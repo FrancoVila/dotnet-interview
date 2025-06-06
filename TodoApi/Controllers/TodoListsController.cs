@@ -55,6 +55,23 @@ namespace TodoApi.Controllers
             return Ok(todoList);
         }
 
+
+        [HttpPut("enddate/{id}")]
+        public async Task<ActionResult> PutEndDate(long id)
+        {
+            var todoList = await _context.TodoList.FindAsync(id);
+
+            if (todoList == null)
+            {
+                return NotFound();
+            }
+
+            todoList.EndDate = DateTime.Now;
+            await _context.SaveChangesAsync();
+
+            return Ok(todoList);
+        }
+
         // POST: api/todolists
         // To protect from over-posting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
