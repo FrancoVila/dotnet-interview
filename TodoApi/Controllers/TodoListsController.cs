@@ -18,23 +18,77 @@ namespace TodoApi.Controllers
 
         // GET: api/todolists
         [HttpGet]
-        public async Task<ActionResult<IList<TodoList>>> GetTodoLists()
+        public async Task<ActionResult<IList<TodoListWithItemsDto>>> GetTodoLists()
         {
-            return Ok(await _context.TodoList.ToListAsync());
+            var lists = await _context.TodoList
+                .Include(l => l.Items)
+                .ToListAsync();
+
+            var dtos = lists.Select(todoList => new TodoListWithItemsDto
+            {
+                Id = todoList.Id,
+                Name = todoList.Name,
+                EndDate = todoList.EndDate,
+                Items = todoList.Items.Select(item => new TodoItemDto
+                {
+                    Id = item.Id,
+                    Description = item.Description,
+                    IsCompleted = item.IsCompleted,
+                    TodoListId = item.TodoListId
+                }).ToList()
+            }).ToList();
+
+            return Ok(dtos);
         }
 
         // GET: api/todolists/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<TodoList>> GetTodoList(long id)
+        public async Task<ActionResult<TodoListWithItemsDto>> GetTodoList(long id)
         {
-            var todoList = await _context.TodoList.FindAsync(id);
+            var todoList = await _context.TodoList
+                .Include(l => l.Items)
+                .FirstOrDefaultAsync(l => l.Id == id);
 
             if (todoList == null)
-            {
                 return NotFound();
-            }
 
-            return Ok(todoList);
+            var dto = new TodoListWithItemsDto
+            {
+                Id = todoList.Id,
+                Name = todoList.Name,
+                EndDate = todoList.EndDate,
+                Items = todoList.Items.Select(item => new TodoItemDto
+                {
+                    Id = item.Id,
+                    Description = item.Description,
+                    IsCompleted = item.IsCompleted,
+                    TodoListId = item.TodoListId
+                }).ToList()
+            };
+
+            return Ok(dto);
+        }
+
+        // GET: api/todolists/{todoListId}/items
+        [HttpGet("{todoListId}/items")]
+        public async Task<ActionResult<IList<TodoItemDto>>> GetTodoListItems(long todoListId)
+        {
+            var todoList = await _context.TodoList
+                .Include(l => l.Items)
+                .FirstOrDefaultAsync(l => l.Id == todoListId);
+
+            if (todoList == null)
+                return NotFound($"La lista con id {todoListId} no existe.");
+
+            var items = todoList.Items.Select(item => new TodoItemDto
+            {
+                Id = item.Id,
+                Description = item.Description,
+                IsCompleted = item.IsCompleted,
+                TodoListId = item.TodoListId
+            }).ToList();
+
+            return Ok(items);
         }
 
         // PUT: api/todolists/5
@@ -75,8 +129,13 @@ namespace TodoApi.Controllers
         // POST: api/todolists
         // To protect from over-posting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [ProducesResponseType(typeof(TodoList), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<TodoList>> PostTodoList(CreateTodoList payload)
         {
+            if (string.IsNullOrWhiteSpace(payload.Name))
+                return BadRequest("El nombre es obligatorio.");
+
             var todoList = new TodoList { Name = payload.Name };
 
             _context.TodoList.Add(todoList);
