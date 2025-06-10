@@ -1,40 +1,83 @@
 # dotnet-interview / TodoApi
 
-[![Open in Coder](https://dev.crunchloop.io/open-in-coder.svg)](https://dev.crunchloop.io/templates/fly-containers/workspace?param.Git%20Repository=git@github.com:crunchloop/dotnet-interview.git)
+Este proyecto es una implementación de la prueba técnica para la posición Jr AI Full Stack Developer en Crunchloop. Se trata de una API RESTful desarrollada en ASP.NET Core 8, utilizando una base de datos en memoria e integrando la funcionalidad requerida con MCP (Manifest of Capabilities Protocol) mediante Claude.
 
-This is a simple Todo List API built in .NET 8. This project is currently being used for .NET full-stack candidates.
+---
 
-## Database
+## 🛠️ Tecnologías utilizadas
 
-The project comes with a devcontainer that provisions a SQL Server database. If you are not going to use the devcontainer, make sure to provision a SQL Server database and
-update the connection string.
+- .NET 8
+- ASP.NET Core Web API
+- Entity Framework Core (InMemoryDatabase)
+- Claude (para ejecución de capacidades vía MCP)
+- Swagger / OpenAPI
+- Git & GitHub
 
-## Build
+---
 
-To build the application:
+## 🚀 Cómo ejecutar el proyecto
 
-`dotnet build`
+1. **Clonar el repositorio**
 
-## Run the API
+```bash
+git clone https://github.com/FrancoVila/dotnet-interview.git
+cd dotnet-interview
 
-To run the TodoApi in your local environment:
+2. Abrir en Visual Studio 2022 o VS Code
 
-`dotnet run --project TodoApi`
+3. Ejecutar la API
 
-## Test
+Desde consola:
+dotnet run --project TodoApi
 
-To run tests:
+O presionando F5 desde Visual Studio con el proyecto TodoApi seleccionado como principal.
 
-`dotnet test`
+4. Acceder a Swagger
 
-Check integration tests at: (https://github.com/crunchloop/interview-tests)
+https://localhost:{puerto}/swagger
+-Reemplazar {puerto} por el puerto local que se indique al correr.
 
-## Contact
+5. Acceso externo vía Ngrok (para Claude)
+Para permitir que Claude acceda a la API local, fue utilizado ngrok:
 
-- Martín Fernández (mfernandez@crunchloop.io)
+Instalar ngrok (si no lo tenés):
 
-## About Crunchloop
+npm install -g ngrok
+Exponer tu puerto local (reemplazá puerto por el que se muestra en consola al levantar la API):
 
-![crunchloop](https://crunchloop.io/logo-blue.png)
+ngrok http {puerto}
+Usar la URL HTTPS pública generada por ngrok (por ejemplo https://abc123.ngrok.io) como endpoint para que Claude pueda consumir la API.
 
-We strongly believe in giving back :rocket:. Let's work together [`Get in touch`](https://crunchloop.io/contact).
+6. Testing
+El proyecto incluye una carpeta TodoApi.Tests, pero no se realizaron modificaciones allí.
+
+La API fue testeada manualmente a través de Swagger(manualmente) y Claude Desktop.
+
+Todos los endpoints implementados fueron validados correctamente en entorno local.
+
+7. Detalles de la implementación
+Base de datos en memoria: no es necesario SQL Server ni DevContainers para correr el proyecto. Utiliza UseInMemoryDatabase de Entity Framework Core.
+
+Integración MCP: se implementó la integración con Claude para que pueda ejecutar capacidades definidas vía el protocolo MCP.
+
+Entrega lista para ejecutar: sin necesidad de configuración adicional.
+
+Estructura del proyecto
+dotnet-interview/
+├── TodoApi/           -> Proyecto principal (API)
+├── TodoApi.Tests/     -> Proyecto de tests
+├── README.md          -> Instrucciones de uso
+├── .github/           -> Workflows y configuración
+└── dotnet-interview.sln
+
+
+Autor
+Franco Vila
+https://github.com/FrancoVila
+
+Notas
+Proyecto fork del repositorio oficial de Crunchloop.
+
+Se eliminaron instrucciones sobre DevContainers y uso de SQL Server para simplificar la ejecución local con una base de datos en memoria.
+
+Se utilizó Ngrok para exponer localmente la API y permitir la ejecución de capacidades por parte de Claude.
